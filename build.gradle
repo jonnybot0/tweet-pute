@@ -17,7 +17,7 @@ plugins {
 }
 
 version "0.1"
-group "tweet.pute"
+group "tweetpute"
 
 apply plugin: "spring-boot"
 apply plugin: "war"
@@ -40,6 +40,7 @@ assets {
 repositories {
     mavenLocal()
     maven { url "https://repo.grails.org/grails/core" }
+    mavenCentral()
 }
 
 dependencyManagement {
@@ -73,6 +74,8 @@ dependencies {
     console "org.grails:grails-console"
 
     compile "org.codehaus.gpars:gpars"
+    compile 'org.twitter4j:twitter4j-core:4.0.1'
+    compile 'org.twitter4j:twitter4j-stream:4.0.1'
 }
 
 task wrapper(type: Wrapper) {

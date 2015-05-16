@@ -24,5 +24,6 @@ build/
 #Vim Swap
 *sw*
 
-#Twitter4J properties
+#Oauth property files
 twitter4j.properties
+twitterOauth.groovy

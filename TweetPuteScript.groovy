@@ -9,18 +9,18 @@ def stream = new TwitterStreamFactory().getInstance()
 def listener = new StatusListener() {
     @Override
     void onStatus(Status status) {
-        System.out.println(status.getUser().getName() + " @ " + status.getCreatedAt() + " : " + status.getText())
+        println status.getUser().getName() + " @ " + status.getCreatedAt() + " : " + status.getText()
     }
- 
+
     @Override
     void onDeletionNotice(StatusDeletionNotice statusDeletionNotice) { }
- 
+
     @Override
     void onTrackLimitationNotice(int i) { }
- 
+
     @Override
     void onScrubGeo(long l, long l2) { }
- 
+
     @Override
     void onStallWarning(StallWarning stallWarning) { }
  
@@ -29,9 +29,5 @@ def listener = new StatusListener() {
         e.printStackTrace()
     }
 }
-def filter = new FilterQuery()
-String[] query = ["Liverpool", "Football"]
-filter.track(query)
- 
 stream.addListener(listener)
-stream.filter(filter)
+stream.sample() //This is what calls the sample API endpoint, instead of the main API
