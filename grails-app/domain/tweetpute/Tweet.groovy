@@ -6,6 +6,9 @@ class Tweet {
 
     Long tweetId
     String text
+    String user
+    Date twitterDate
+    Date dateCreated
 
     static constraints = {
     }

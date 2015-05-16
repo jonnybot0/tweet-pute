@@ -15,8 +15,8 @@ class TweetSpec extends Specification {
     def cleanup() {
     }
 
-    void "test something"() {
-        expect:"fix me"
+    def "test get emojis"() {
+        expect:""
             true == false
     }
 }
