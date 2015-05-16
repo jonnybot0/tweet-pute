@@ -17,5 +17,12 @@ stacktrace.log
 .gradle
 local.properties
 .idea/
+*.iml
 .DS_Store
 build/
+
+#Vim Swap
+*sw*
+
+#Twitter4J properties
+twitter4j.properties
