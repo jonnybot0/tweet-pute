@@ -1,6 +1,7 @@
 package tweet.pute
 
 import spock.lang.Specification
+import spock.lang.Unroll
 import grails.test.mixin.Mock
 
 /**
@@ -22,15 +23,20 @@ class TweetFeederSpec extends Specification {
     def cleanup() {
     }
 
+    @Unroll("Testing make collaborators for #domain.simpleName")
     void "test make collaborators"() {
         setup:
-            def tweet = new Tweet(text: 'Yo dawgs',
+            def tweet = new Tweet(text: "Yo dawgs $data",
                 tweetId: 1L,
                 user: 'jonnytron',
                 twitterDate: new Date())
             List objects = tweetFeeder.makeCollaborators(domain, data, tweet)
-        expect: objects.each{
+            String objectSetPropertyName = "${domain.simpleName}".toLowerCase() + 's'
+        expect: "All objects are created"
+            objects.each{
                 assert it.instanceOf(domain)
+                assert it.tweets == [tweet] as Set
+                tweet."$objectSetPropertyName".contains(it)
             }
         where:
             domain      | data
