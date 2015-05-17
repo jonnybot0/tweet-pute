@@ -1,5 +1,6 @@
 package tweet.pute
 import twitter4j.*
+import grails.core.GrailsClass
 class TweetFeeder implements StatusListener {
     void onStatus(Status status) {
         Tweet.withNewSession {
@@ -68,15 +69,18 @@ class TweetFeeder implements StatusListener {
         makeCollaborators(Pic, picUrls)
     }
 
-    def makeCollaborators(domainClass, List listOfTextData) {
-        String domainName = domainClass.getName()
+    List makeCollaborators(Class domainClass, List listOfTextData, Tweet tweet) {
+        String domainName = domainClass.simpleName
         String addMethod = "addTo$domainName" + 's'
+        List objects = []
         domainClass.withNewSession {
-            listOfTextData.each {
+            objects = listOfTextData.collect{ text ->
                 def domainInstance = domainClass.findByText(text) ?: domainClass.newInstance(text: text)
-                tweet."$addMethod"(emoji)
+                tweet."$addMethod"(domainInstance)
+                domainInstance
             }
             tweet.save()
         }
+        return objects
     }
 }

@@ -1,6 +1,7 @@
 package tweet.pute
 
 import grails.test.mixin.TestFor
+import grails.test.mixin.Mock
 import spock.lang.Specification
 
 /**
