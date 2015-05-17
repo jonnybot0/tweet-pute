@@ -1,7 +1,8 @@
-package tweetpute
+package tweet.pute
 
 import grails.test.mixin.*
 import spock.lang.*
+import tweet.pute.TweetController
 
 @TestFor(TweetController)
 @Mock(Tweet)
@@ -146,5 +147,10 @@ class TweetControllerSpec extends Specification {
             Tweet.count() == 0
             response.redirectedUrl == '/tweet/index'
             flash.message != null
+    }
+
+    def "test average tweet computation"() {
+        expect:
+            false
     }
 }

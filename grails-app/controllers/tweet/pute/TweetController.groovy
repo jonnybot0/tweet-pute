@@ -1,4 +1,4 @@
-package tweetpute
+package tweet.pute
 
 import static org.springframework.http.HttpStatus.*
 import grails.transaction.Transactional

@@ -1,5 +1,5 @@
 import twitter4j.TwitterStreamFactory
-import tweetpute.TweetFeeder
+import tweet.pute.TweetFeeder
 import groovyx.gpars.GParsPool
 
 class BootStrap {
