@@ -40,33 +40,20 @@ class TweetFeeder implements StatusListener {
 
     def makeHashtags(status, tweet) {
         List<String> hashtags = status.getHashTagEntities()?.collect { it.getText() }
-        hashtags.eachParallel { hashtagText ->
-            Hashtag.withNewSession {
-                def hashtag = Hashtag.findByText(hashtagText) ?: new Hashtag(text: hashtagText)
-                tweet.addToHashtags(hashtag)
-                tweet.save()
-            }
-        }
+        makeCollaborators(Hashtag, hashtags, tweet)
     }
 
     def makeEmojis(tweet) {
         def emojiRegex = ~/ /
         List<String> emojis = tweet.text =~ emojiRegex
-        emojis.each { emojiText ->
-            Emoji.withNewSession {
-                def emoji = Emoji.findByText(emojiText) ?: new Emoji(emoji: emojiText)
-                tweet.addToEmojis(emoji)
-                tweet.save()
-            }
-        }
+        makeCollaborators(Emoji, emojis, tweet)
     }
 
     def makeUrls(tweet) {
         List<String> urls = tweet.text.collect{} //Find some way to collect the URLs
         List<String> picUrls = urls.findAll{it.matches(/(pic\.twitter\.com)||instagram/)} //Distinguish pics
         urls = urls - picUrls
-        makeCollaborators(Url, urls)
-        makeCollaborators(Pic, picUrls)
+        makeCollaborators(Url, urls) + makeCollaborators(Pic, picUrls)
     }
 
     List makeCollaborators(Class domainClass, List listOfTextData, Tweet tweet) {
