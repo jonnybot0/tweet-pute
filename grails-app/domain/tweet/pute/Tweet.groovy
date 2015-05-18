@@ -9,6 +9,7 @@ class Tweet {
     String user
     Date twitterDate
     Date dateCreated
+    Date lastUpdated
 
     static constraints = {
     }
