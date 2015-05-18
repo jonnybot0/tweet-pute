@@ -1,11 +1,20 @@
 package tweet.pute
 import twitter4j.*
-import grails.core.GrailsClass
+import com.vdurmont.emoji.*
+
 class TweetFeeder implements StatusListener {
+
+    static allEmojis = EmojiManager.getAll()
+
     void onStatus(Status status) {
+        GPars.
         Tweet.withNewSession {
             def tweet = makeTweet(status)
             if (tweet) {
+                //TODO: Make these operations parallel? -- may not be able to due to hibernate
+                makeHashtags(status, tweet)
+                makeEmojis(tweet)
+                makeUrls(tweet)
             }
         }
     }
@@ -38,18 +47,17 @@ class TweetFeeder implements StatusListener {
         }
     }
 
-    def makeHashtags(status, tweet) {
+    def makeHashtags(Status status, Tweet tweet) {
         List<String> hashtags = status.getHashTagEntities()?.collect { it.getText() }
         makeCollaborators(Hashtag, hashtags, tweet)
     }
 
-    def makeEmojis(tweet) {
-        def emojiRegex = ~/ /
-        List<String> emojis = tweet.text =~ emojiRegex
+    def makeEmojis(Tweet tweet) {
+        List<String> emojis = tweet.text.toArray().collect{}
         makeCollaborators(Emoji, emojis, tweet)
     }
 
-    def makeUrls(tweet) {
+    def makeUrls(Tweet tweet) {
         List<String> urls = tweet.text.collect{} //Find some way to collect the URLs
         List<String> picUrls = urls.findAll{it.matches(/(pic\.twitter\.com)||instagram/)} //Distinguish pics
         urls = urls - picUrls
@@ -64,7 +72,9 @@ class TweetFeeder implements StatusListener {
             objects = listOfTextData.collect{ text ->
                 def domainInstance = domainClass.findByText(text) ?: domainClass.newInstance(text: text)
                 tweet."$addMethod"(domainInstance)
-                domainInstance
+                if (!domainInstance.save()) {
+                    println "Failed to save $domainName with data $text"
+                }
             }
             tweet.save()
         }
