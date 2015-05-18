@@ -1,20 +1,22 @@
 package tweet.pute
 import twitter4j.*
-import com.vdurmont.emoji.*
+import groovyx.gpars.GParsPool
+import java.net.MalformedURLException
+//import com.vdurmont.emoji.EmojiManager
 
 class TweetFeeder implements StatusListener {
 
-    static allEmojis = EmojiManager.getAll()
+    static allEmojis = [] //EmojiManager.getAll()
 
     void onStatus(Status status) {
-        GPars.
-        Tweet.withNewSession {
-            def tweet = makeTweet(status)
-            if (tweet) {
-                //TODO: Make these operations parallel? -- may not be able to due to hibernate
-                makeHashtags(status, tweet)
-                makeEmojis(tweet)
-                makeUrls(tweet)
+        GParsPool.withPool {
+            Tweet.withNewSession {
+                def tweet = makeTweet(status)
+                if (tweet) {
+                    makeHashtags(status, tweet)
+                    makeEmojis(tweet)
+                    makeUrls(tweet)
+                }
             }
         }
     }
@@ -48,20 +50,23 @@ class TweetFeeder implements StatusListener {
     }
 
     def makeHashtags(Status status, Tweet tweet) {
-        List<String> hashtags = status.getHashTagEntities()?.collect { it.getText() }
+        List<String> hashtags = status.getHashtagEntities()?.collect { it.getText() }
         makeCollaborators(Hashtag, hashtags, tweet)
     }
 
     def makeEmojis(Tweet tweet) {
-        List<String> emojis = tweet.text.toArray().collect{}
+        List<String> emojis = tweet.text.toCharArray()?.findAll{allEmojis.contains(it)}
         makeCollaborators(Emoji, emojis, tweet)
     }
 
     def makeUrls(Tweet tweet) {
-        List<String> urls = tweet.text.collect{} //Find some way to collect the URLs
-        List<String> picUrls = urls.findAll{it.matches(/(pic\.twitter\.com)||instagram/)} //Distinguish pics
+        List<String> urls = tweet.text.tokenize().findResults{
+            try { if (it.toURL()) {return it} }
+            catch (MalformedURLException e) { return null }
+        }
+        List<String> picUrls = urls?.findAll{it.matches(/(pic\.twitter\.com)||instagram/)} //Distinguish pics
         urls = urls - picUrls
-        makeCollaborators(Url, urls) + makeCollaborators(Pic, picUrls)
+        makeCollaborators(Url, urls, tweet) + makeCollaborators(Pic, picUrls, tweet)
     }
 
     List makeCollaborators(Class domainClass, List listOfTextData, Tweet tweet) {
