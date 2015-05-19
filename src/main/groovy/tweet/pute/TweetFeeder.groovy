@@ -68,7 +68,7 @@ class TweetFeeder implements StatusListener {
     def makeUrls(Status status, Tweet tweet) {
         List<String> urls = status.getURLEntities()*.getExpandedURL()
         List<String> picUrls = status.getMediaEntities()*.getExpandedURL()
-        List<String> otherPics = urls.findAll{it.matches(~'instagr[.]?am')}
+        List<String> otherPics = urls.findAll{it.find(~/instagr[.]?am/)}
         picUrls = (picUrls + otherPics).unique()
         urls = urls - picUrls
         makeCollaborators(Url, urls, tweet) + makeCollaborators(Pic, picUrls, tweet)
