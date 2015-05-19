@@ -7,7 +7,7 @@ import com.vdurmont.emoji.EmojiManager
 class TweetFeeder implements StatusListener {
 
     def em = new EmojiManager()
-    def allEmojis = em.getAll().collect{it.getUnicode()}
+    List allEmojis = em.getAll().collect{it.getUnicode()}
 
     void onStatus(Status status) {
         GParsPool.withPool {
@@ -56,8 +56,11 @@ class TweetFeeder implements StatusListener {
     }
 
     def makeEmojis(Tweet tweet) {
-        List<String> emojis = tweet.text.toList()?.intersect(allEmojis)
+        List<String> emojis = allEmojis.findAll{
+            tweet.text.contains(it)
+        }
         if (emojis) {
+            println "Found ${emojis.size()} emojis: $emojis"
             return makeCollaborators(Emoji, emojis, tweet)
         }
         else {return []}
@@ -83,10 +86,11 @@ class TweetFeeder implements StatusListener {
                 domainInstance.addToTweets(tweet)
                 if (!domainInstance.save()) {
                     println "Failed to save $domainName with data $text"
+                    domainInstance.errors.allErrors.each{println it}
                     return null
                 }
                 else {
-                    println "Created domain instance $domainInstance"
+                    //println "Created domain instance $domainInstance"
                     tweet."$addMethod"(domainInstance)
                     return domainInstance
                 }

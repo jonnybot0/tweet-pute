@@ -15,7 +15,7 @@ class TweetFeederSpec extends Specification {
             [-16, -97, -102, -113], [-16, -97, -102, -103], [-16, -97, -108, -102],
             [-16, -97, -109, -95], [-16, -97, -112, -117], [-16, -97, -114, -112],
             [-16, -97, -108, -126], [-16, -97, -114, -85], [-30, -104, -108],
-            [-16, -97, -115, -102]].collect{new String(it as byte[])}
+            [-16, -97, -115, -102]].collect{new String(it as byte[], 'UTF-8')}
 
     def setup() {
     }
@@ -51,7 +51,7 @@ class TweetFeederSpec extends Specification {
 
     void "test emoji construction"() {
         setup:
-
+            println "Looking for ${someEmojis.size()} emojis"
             def tweet = new Tweet(text: "Yo dawgs ${someEmojis.join(' ')}",
                 tweetId: 42L,
                 user: 'jonnytron',
@@ -60,7 +60,7 @@ class TweetFeederSpec extends Specification {
             println tweet.text
             def madeEmojis = Emoji.list()
         expect:
-            madeEmojis.size() == 1
-            madeEmojis[0].text.contains(someEmojis[0])
+            madeEmojis.size() == someEmojis.size()
+            madeEmojis*.text.contains(someEmojis[0])
     }
 }
