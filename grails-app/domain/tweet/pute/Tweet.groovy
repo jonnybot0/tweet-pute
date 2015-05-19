@@ -12,5 +12,7 @@ class Tweet {
     Date lastUpdated
 
     static constraints = {
+        user nullable: true
+        twitterDate nullable: true
     }
 }

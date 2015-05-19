@@ -16,7 +16,7 @@ class TweetFeeder implements StatusListener {
                 if (tweet) {
                     makeHashtags(status, tweet)
                     makeEmojis(tweet)
-                    makeUrls(tweet)
+                    makeUrls(status, tweet)
                 }
             }
         }
@@ -37,7 +37,7 @@ class TweetFeeder implements StatusListener {
     def makeTweet(Status status) {
         def tweet = new Tweet(text: status.getText(),
                 tweetId: status.getId(),
-                user: status.getUser().getName(),
+                user: status.getUser()?.getName(),
                 twitterDate: status.getCreatedAt()
         )
         if (!tweet.save()) {
@@ -65,11 +65,8 @@ class TweetFeeder implements StatusListener {
         else {return []}
     }
 
-    def makeUrls(Tweet tweet) {
-        List<String> urls = tweet.text.tokenize().findResults{
-            try { if (it.toURL()) {return it} }
-            catch (MalformedURLException e) { return null }
-        }
+    def makeUrls(Status status, Tweet tweet) {
+        List<String> urls = status.getURLEntities()*.getDisplayURL()
         List<String> picUrls = urls?.findAll{it.matches(/(pic\.twitter\.com)||instagram/)} //Distinguish pics
         urls = urls - picUrls
         makeCollaborators(Url, urls, tweet) + makeCollaborators(Pic, picUrls, tweet)
