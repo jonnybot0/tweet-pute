@@ -2,11 +2,12 @@ package tweet.pute
 import twitter4j.*
 import groovyx.gpars.GParsPool
 import java.net.MalformedURLException
-//import com.vdurmont.emoji.EmojiManager
+import com.vdurmont.emoji.EmojiManager
 
 class TweetFeeder implements StatusListener {
 
-    static allEmojis = [] //EmojiManager.getAll()
+    def em = new EmojiManager()
+    def allEmojis = em.getAll().collect{it.getUnicode()}
 
     void onStatus(Status status) {
         GParsPool.withPool {
@@ -55,8 +56,11 @@ class TweetFeeder implements StatusListener {
     }
 
     def makeEmojis(Tweet tweet) {
-        List<String> emojis = tweet.text.toCharArray()?.findAll{allEmojis.contains(it)}
-        makeCollaborators(Emoji, emojis, tweet)
+        List<String> emojis = tweet.text.toList()?.intersect(allEmojis)
+        if (emojis) {
+            return makeCollaborators(Emoji, emojis, tweet)
+        }
+        else {return []}
     }
 
     def makeUrls(Tweet tweet) {
@@ -74,11 +78,17 @@ class TweetFeeder implements StatusListener {
         String addMethod = "addTo$domainName" + 's'
         List objects = []
         domainClass.withNewSession {
-            objects = listOfTextData.collect{ text ->
+            objects = listOfTextData.findResults{ text ->
                 def domainInstance = domainClass.findByText(text) ?: domainClass.newInstance(text: text)
-                tweet."$addMethod"(domainInstance)
+                domainInstance.addToTweets(tweet)
                 if (!domainInstance.save()) {
                     println "Failed to save $domainName with data $text"
+                    return null
+                }
+                else {
+                    println "Created domain instance $domainInstance"
+                    tweet."$addMethod"(domainInstance)
+                    return domainInstance
                 }
             }
             tweet.save()
