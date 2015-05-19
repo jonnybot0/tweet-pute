@@ -60,7 +60,6 @@ class TweetFeeder implements StatusListener {
             tweet.text.contains(it)
         }
         if (emojis) {
-            println "Found ${emojis.size()} emojis: $emojis"
             return makeCollaborators(Emoji, emojis, tweet)
         }
         else {return []}
@@ -95,7 +94,7 @@ class TweetFeeder implements StatusListener {
                     return domainInstance
                 }
             }
-            tweet.save()
+            tweet.save(flush: true)
         }
         return objects
     }

@@ -66,6 +66,7 @@ dependencies {
     runtime "org.grails.plugins:scaffolding"
 
     testCompile "org.grails:grails-plugin-testing"
+    testCompile 'org.grails:grails-datastore-test-support:1.0-grails-2.4'
     testCompile "org.grails.plugins:geb"
 
     // Note: It is recommended to update to a more robust driver (Chrome, Firefox etc.)

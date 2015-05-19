@@ -32,7 +32,6 @@ class TweetFeederSpec extends Specification {
                 twitterDate: new Date())
             List objects = tweetFeeder.makeCollaborators(domain, data, tweet)
             String objectSetPropertyName = "${domain.simpleName}".toLowerCase() + 's'
-            println "Created these objects: $objects"
         expect: "All objects are created"
             objects.size() == data.size()
             objects.each{
@@ -51,16 +50,16 @@ class TweetFeederSpec extends Specification {
 
     void "test emoji construction"() {
         setup:
-            println "Looking for ${someEmojis.size()} emojis"
             def tweet = new Tweet(text: "Yo dawgs ${someEmojis.join(' ')}",
                 tweetId: 42L,
                 user: 'jonnytron',
                 twitterDate: new Date())
             tweetFeeder.makeEmojis(tweet)
-            println tweet.text
-            def madeEmojis = Emoji.list()
+            def madeEmojis = Emoji.findAll()
         expect:
             madeEmojis.size() == someEmojis.size()
-            madeEmojis*.text.contains(someEmojis[0])
+            someEmojis.each{
+                assert madeEmojis*.text.contains(it)
+            }
     }
 }
