@@ -13,6 +13,16 @@
                 <li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
             </ul>
         </div>
+        <div>
+            <h1>Averages</h1>
+                <g:each in="${average}" var="avg" >
+                <p>${avg.key}: <g:formatNumber number="${avg.value}" format="###,###" /> </p>
+                </g:each>
+            <h1>Stats</h1>
+            <g:each in="${stats}" var="stat" >
+                <p>${stat.key}: <g:formatNumber number="${stat.value}" type="percent"/></p>
+            </g:each>
+        </div>
         <div id="list-tweet" class="content scaffold-list" role="main">
             <h1><g:message code="default.list.label" args="[entityName]" /></h1>
             <g:if test="${flash.message}">

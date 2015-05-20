@@ -24,8 +24,8 @@ class TweetPuteService {
         def lastTweet = Tweet.get(tweetCount)
         def spaceBetween = TimeCategory.minus(lastTweet.dateCreated, firstTweet.lastUpdated)
         if(spaceBetween.seconds != 0) {
-            return [perHour: tweetCount/(spaceBetween.seconds * 60 * 60),
-                        perMinute: tweetCount/(spaceBetween.seconds * 60 ),
+            return [perHour: (tweetCount * 60 * 60)/(spaceBetween.seconds),
+                        perMinute: (tweetCount * 60)/(spaceBetween.seconds),
                         perSecond: tweetCount/(spaceBetween.seconds), ]
         }
         else {
