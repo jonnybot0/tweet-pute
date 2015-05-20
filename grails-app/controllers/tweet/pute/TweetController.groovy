@@ -13,11 +13,20 @@ class TweetController {
         def tweetCount = Tweet.count()
         def firstTweet = Tweet.get(1)
         def lastTweet = Tweet.get(tweetCount)
+        //Note that this implementation will calculated the tweets-per-hour of twitter
+        // NOT the Tweet Pute app's rate of reception and processing. For that, dateCreated would be more appropriate.
         def spaceBetween = lastTweet.twitterDate - firstTweet.twitterDate
-        respond Tweet.list(params), model:[tweetCount: tweetCount,
-                average: [perHour: tweetCount/(spaceBetween*24),
-                        perMinute: tweetCount/(spaceBetween*24*60),
-                        perSecond: tweetCount/(spaceBetween*24*60*60), ]]
+        Map averages
+        if(spaceBetween != 0) {
+            averages = [perHour: tweetCount/(spaceBetween*24),
+                    perMinute: tweetCount/(spaceBetween*24*60),
+                    perSecond: tweetCount/(spaceBetween*24*60*60), ]
+        }
+        else {
+            averages = [perHour: 'insufficient data', perMinute: 'insufficient data', perSecond: 'insufficient data',
+                 message: 'Please wait a bit while we gather some tweets.']
+        }
+        respond Tweet.list(params), model:[tweetCount: tweetCount, average: averages]
     }
 
     def show(Tweet tweet) {

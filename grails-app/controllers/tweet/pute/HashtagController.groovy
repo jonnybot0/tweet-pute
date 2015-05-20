@@ -5,12 +5,14 @@ import grails.transaction.Transactional
 
 @Transactional(readOnly = true)
 class HashtagController {
+    def tweetPuteService
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        respond Hashtag.list(params), model:[hashtagCount: Hashtag.count()]
+        List<Hashtag> hashtags = tweetPuteService.listCollaborators(Hashtag, params)
+        respond hashtags, model:[hashtagCount: Hashtag.count()]
     }
 
     def show(Hashtag hashtag) {

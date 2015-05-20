@@ -5,12 +5,14 @@ import grails.transaction.Transactional
 
 @Transactional(readOnly = true)
 class UrlController {
+    def tweetPuteService
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        respond Url.list(params), model:[urlCount: Url.count()]
+        List<Url> urls = tweetPuteService.listCollaborators(Url, params)
+        respond urls, model:[urlCount: Url.count()]
     }
 
     def show(Url url) {

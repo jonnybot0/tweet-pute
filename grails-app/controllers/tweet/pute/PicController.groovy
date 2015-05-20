@@ -5,12 +5,14 @@ import grails.transaction.Transactional
 
 @Transactional(readOnly = true)
 class PicController {
+    def tweetPuteService
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        respond Pic.list(params), model:[picCount: Pic.count()]
+        List<Pic> pics = tweetPuteService.listCollaborators(Pic, params)
+        respond pics, model:[picCount: Pic.count()]
     }
 
     def show(Pic pic) {
