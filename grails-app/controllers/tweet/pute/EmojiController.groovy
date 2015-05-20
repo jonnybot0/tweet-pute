@@ -10,90 +10,21 @@ class EmojiController {
 
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        respond Emoji.list(params), model:[emojiCount: Emoji.count()]
+        List<Emoji> emojis = []
+        if (params.sort == 'tweets') {
+            String ascOrDesc = params.order == 'asc' ? 'asc' : 'desc'
+            emojis = Emoji.executeQuery("""SELECT emoji
+                from Emoji emoji
+                order by size(emoji.tweets) $ascOrDesc """, [:], params)
+        }
+        else {emojis = Emoji.list(params)}
+        respond emojis, model:[emojiCount: Emoji.count()]
     }
 
     def show(Emoji emoji) {
         respond emoji
     }
 
-    def create() {
-        respond new Emoji(params)
-    }
-
-    @Transactional
-    def save(Emoji emoji) {
-        if (emoji == null) {
-            transactionStatus.setRollbackOnly()
-            notFound()
-            return
-        }
-
-        if (emoji.hasErrors()) {
-            transactionStatus.setRollbackOnly()
-            respond emoji.errors, view:'create'
-            return
-        }
-
-        emoji.save flush:true
-
-        request.withFormat {
-            form multipartForm {
-                flash.message = message(code: 'default.created.message', args: [message(code: 'emoji.label', default: 'Emoji'), emoji.id])
-                redirect emoji
-            }
-            '*' { respond emoji, [status: CREATED] }
-        }
-    }
-
-    def edit(Emoji emoji) {
-        respond emoji
-    }
-
-    @Transactional
-    def update(Emoji emoji) {
-        if (emoji == null) {
-            transactionStatus.setRollbackOnly()
-            notFound()
-            return
-        }
-
-        if (emoji.hasErrors()) {
-            transactionStatus.setRollbackOnly()
-            respond emoji.errors, view:'edit'
-            return
-        }
-
-        emoji.save flush:true
-
-        request.withFormat {
-            form multipartForm {
-                flash.message = message(code: 'default.updated.message', args: [message(code: 'emoji.label', default: 'Emoji'), emoji.id])
-                redirect emoji
-            }
-            '*'{ respond emoji, [status: OK] }
-        }
-    }
-
-    @Transactional
-    def delete(Emoji emoji) {
-
-        if (emoji == null) {
-            transactionStatus.setRollbackOnly()
-            notFound()
-            return
-        }
-
-        emoji.delete flush:true
-
-        request.withFormat {
-            form multipartForm {
-                flash.message = message(code: 'default.deleted.message', args: [message(code: 'emoji.label', default: 'Emoji'), emoji.id])
-                redirect action:"index", method:"GET"
-            }
-            '*'{ render status: NO_CONTENT }
-        }
-    }
 
     protected void notFound() {
         request.withFormat {
