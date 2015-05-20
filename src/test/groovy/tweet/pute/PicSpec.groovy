@@ -25,6 +25,6 @@ class PicSpec extends Specification {
             pic instanceof Pic
             pic instanceof Url
             saveResult
-            Url.list().contains(pic)
+            Url.list()[0].id == pic.id
     }
 }

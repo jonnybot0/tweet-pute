@@ -15,8 +15,11 @@ class EmojiSpec extends Specification {
     def cleanup() {
     }
 
-    void "test something"() {
-        expect:"fix me"
-            true == false
+    void "test save"() {
+        setup:
+            String smiley = new String('F09F9881'.decodeHex())
+            new Emoji(text:smiley).save()
+        expect:
+            Emoji.findAll()[0].text == smiley
     }
 }

@@ -10,7 +10,14 @@ class TweetController {
 
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        respond Tweet.list(params), model:[tweetCount: Tweet.count()]
+        def tweetCount = Tweet.count()
+        def firstTweet = Tweet.get(1)
+        def lastTweet = Tweet.get(tweetCount)
+        def spaceBetween = lastTweet.twitterDate - firstTweet.twitterDate
+        respond Tweet.list(params), model:[tweetCount: tweetCount,
+                average: [perHour: tweetCount/(spaceBetween*24),
+                        perMinute: tweetCount/(spaceBetween*24*60),
+                        perSecond: tweetCount/(spaceBetween*24*60*60), ]]
     }
 
     def show(Tweet tweet) {

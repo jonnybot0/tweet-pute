@@ -7,55 +7,53 @@ import tweet.pute.TweetController
 @TestFor(TweetController)
 @Mock(Tweet)
 class TweetControllerSpec extends Specification {
+    Random random = new Random()
+    static Date then = new Date()-1
+    static Date soon = new Date()+1
+
+    def setup() {
+        //Create some tweets
+        def oldTweet = new Tweet(text: "A later tweet",
+                tweetId: 1L,
+                user: '123',
+                twitterDate: then)
+        oldTweet.save()
+        [2, 3, 4, 5, 6].each{
+            def tweet = new Tweet(text: "Sample tweet $it",
+                tweetId: it.toLong(),
+                user: it.toString(),
+                twitterDate: new Date() )
+            tweet.save()
+        }
+        def newTweet = new Tweet(text: "A later tweet",
+                tweetId: 54L,
+                user: '123',
+                twitterDate: soon )
+        newTweet.save()
+    }
+
+    def cleanup() {
+        Tweet.list().each{it.delete(flush: true)}
+    }
 
     def populateValidParams(params) {
         assert params != null
-        // TODO: Populate valid properties like...
-        //params["name"] = 'someValidName'
+        params["text"] = 'OH HAI GUYS'
+        params["twitterId"] = random.nextInt() % 1000
     }
 
     void "Test the index action returns the correct model"() {
 
         when:"The index action is executed"
             controller.index()
-
+            println model
         then:"The model is correct"
-            !model.tweetList
-            model.tweetCount == 0
-    }
+            model.tweetList
+            model.tweetCount == 7
+            model.average.perHour == 7/48
+            model.average.perMinute == 7/(24*2*60)
+            model.average.perSecond == 7/(24*2*60*60)
 
-    void "Test the create action returns the correct model"() {
-        when:"The create action is executed"
-            controller.create()
-
-        then:"The model is correctly created"
-            model.tweet!= null
-    }
-
-    void "Test the save action correctly persists an instance"() {
-
-        when:"The save action is executed with an invalid instance"
-            request.contentType = FORM_CONTENT_TYPE
-            request.method = 'POST'
-            def tweet = new Tweet()
-            tweet.validate()
-            controller.save(tweet)
-
-        then:"The create view is rendered again with the correct model"
-            model.tweet!= null
-            view == 'create'
-
-        when:"The save action is executed with a valid instance"
-            response.reset()
-            populateValidParams(params)
-            tweet = new Tweet(params)
-
-            controller.save(tweet)
-
-        then:"A redirect is issued to the show action"
-            response.redirectedUrl == '/tweet/show/1'
-            controller.flash.message != null
-            Tweet.count() == 1
     }
 
     void "Test that the show action returns the correct model"() {
@@ -72,85 +70,5 @@ class TweetControllerSpec extends Specification {
 
         then:"A model is populated containing the domain instance"
             model.tweet == tweet
-    }
-
-    void "Test that the edit action returns the correct model"() {
-        when:"The edit action is executed with a null domain"
-            controller.edit(null)
-
-        then:"A 404 error is returned"
-            response.status == 404
-
-        when:"A domain instance is passed to the edit action"
-            populateValidParams(params)
-            def tweet = new Tweet(params)
-            controller.edit(tweet)
-
-        then:"A model is populated containing the domain instance"
-            model.tweet == tweet
-    }
-
-    void "Test the update action performs an update on a valid domain instance"() {
-        when:"Update is called for a domain instance that doesn't exist"
-            request.contentType = FORM_CONTENT_TYPE
-            request.method = 'PUT'
-            controller.update(null)
-
-        then:"A 404 error is returned"
-            response.redirectedUrl == '/tweet/index'
-            flash.message != null
-
-        when:"An invalid domain instance is passed to the update action"
-            response.reset()
-            def tweet = new Tweet()
-            tweet.validate()
-            controller.update(tweet)
-
-        then:"The edit view is rendered again with the invalid instance"
-            view == 'edit'
-            model.tweet == tweet
-
-        when:"A valid domain instance is passed to the update action"
-            response.reset()
-            populateValidParams(params)
-            tweet = new Tweet(params).save(flush: true)
-            controller.update(tweet)
-
-        then:"A redirect is issued to the show action"
-            tweet != null
-            response.redirectedUrl == "/tweet/show/$tweet.id"
-            flash.message != null
-    }
-
-    void "Test that the delete action deletes an instance if it exists"() {
-        when:"The delete action is called for a null instance"
-            request.contentType = FORM_CONTENT_TYPE
-            request.method = 'DELETE'
-            controller.delete(null)
-
-        then:"A 404 is returned"
-            response.redirectedUrl == '/tweet/index'
-            flash.message != null
-
-        when:"A domain instance is created"
-            response.reset()
-            populateValidParams(params)
-            def tweet = new Tweet(params).save(flush: true)
-
-        then:"It exists"
-            Tweet.count() == 1
-
-        when:"The domain instance is passed to the delete action"
-            controller.delete(tweet)
-
-        then:"The instance is deleted"
-            Tweet.count() == 0
-            response.redirectedUrl == '/tweet/index'
-            flash.message != null
-    }
-
-    def "test average tweet computation"() {
-        expect:
-            false
     }
 }
