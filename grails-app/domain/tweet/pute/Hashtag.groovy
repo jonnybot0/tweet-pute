@@ -5,6 +5,7 @@ import grails.rest.*
 class Hashtag {
     static hasMany = [tweets: Tweet]
     static belongsTo = Tweet
+    static transients = ['tweetCount']
 
     String text
     Date dateCreated
@@ -12,5 +13,9 @@ class Hashtag {
 
     static constraints = {
         text unique: true
+    }
+
+    def getTweetCount() {
+        tweets.size()
     }
 }
