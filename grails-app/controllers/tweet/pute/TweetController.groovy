@@ -2,31 +2,28 @@ package tweet.pute
 
 import static org.springframework.http.HttpStatus.*
 import grails.transaction.Transactional
+import grails.converters.JSON
 
 @Transactional(readOnly = true)
 class TweetController {
+    def tweetPuteService
 
     static allowedMethods = [save: "POST", update: "PUT", delete: "DELETE"]
 
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
         def tweetCount = Tweet.count()
-        def firstTweet = Tweet.get(1)
-        def lastTweet = Tweet.get(tweetCount)
-        //Note that this implementation will calculated the tweets-per-hour of twitter
-        // NOT the Tweet Pute app's rate of reception and processing. For that, dateCreated would be more appropriate.
-        def spaceBetween = lastTweet.twitterDate - firstTweet.twitterDate
-        Map averages
-        if(spaceBetween != 0) {
-            averages = [perHour: tweetCount/(spaceBetween*24),
-                    perMinute: tweetCount/(spaceBetween*24*60),
-                    perSecond: tweetCount/(spaceBetween*24*60*60), ]
-        }
-        else {
-            averages = [perHour: 'insufficient data', perMinute: 'insufficient data', perSecond: 'insufficient data',
-                 message: 'Please wait a bit while we gather some tweets.']
-        }
-        respond Tweet.list(params), model:[tweetCount: tweetCount, average: averages]
+        Map averages = tweetPuteService.getTweetCollectionRates(tweetCount)
+        Map stats = tweetPuteService.getCollaboratorStats(tweetCount)
+        respond Tweet.list(params), model:[tweetCount: tweetCount, average: averages, stats: stats]
+    }
+
+    def stats() {
+        def tweetCount = Tweet.count()
+        Map averages = tweetPuteService.getTweetCollectionRates(tweetCount)
+        Map stats = tweetPuteService.getCollaboratorStats(tweetCount)
+        Map data = [average: averages, stats: stats]
+        render data as JSON
     }
 
     def show(Tweet tweet) {

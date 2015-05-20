@@ -1,6 +1,7 @@
 package tweet.pute
 
 import grails.transaction.Transactional
+import groovy.time.TimeCategory
 
 @Transactional
 class TweetPuteService {
@@ -16,5 +17,28 @@ class TweetPuteService {
         }
         else {collaborators = domainClass.list(params)}
         return collaborators
+    }
+
+    Map getTweetCollectionRates(Integer tweetCount) {
+        def firstTweet = Tweet.get(1)
+        def lastTweet = Tweet.get(tweetCount)
+        def spaceBetween = TimeCategory.minus(lastTweet.dateCreated, firstTweet.lastUpdated)
+        if(spaceBetween.seconds != 0) {
+            return [perHour: tweetCount/(spaceBetween.seconds * 60 * 60),
+                        perMinute: tweetCount/(spaceBetween.seconds * 60 ),
+                        perSecond: tweetCount/(spaceBetween.seconds), ]
+        }
+        else {
+            return [perHour: 'insufficient data', perMinute: 'insufficient data', perSecond: 'insufficient data',
+                        message: 'Please wait a bit while we gather some tweets.']
+        }
+    }
+
+    Map getCollaboratorStats(Integer tweetCount) {
+        [withPics: Tweet.countByPicsIsNotEmpty(),
+            withUrls: Tweet.countByUrlsIsNotEmpty(),
+            withEmojis: Tweet.countByEmojisIsNotEmpty()].collectEntries{
+            [(it.key): it.value/tweetCount]
+        }
     }
 }
