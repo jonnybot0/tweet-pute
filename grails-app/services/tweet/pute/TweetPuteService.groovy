@@ -22,7 +22,7 @@ class TweetPuteService {
     Map getTweetCollectionRates(Integer tweetCount) {
         def firstTweet = Tweet.get(1)
         def lastTweet = Tweet.get(tweetCount)
-        def spaceBetween = TimeCategory.minus(lastTweet.dateCreated, firstTweet.lastUpdated)
+        def spaceBetween = TimeCategory.minus(lastTweet.dateCreated, firstTweet.dateCreated)
         if(spaceBetween.seconds != 0) {
             return [perHour: (tweetCount * 60 * 60)/(spaceBetween.seconds),
                         perMinute: (tweetCount * 60)/(spaceBetween.seconds),

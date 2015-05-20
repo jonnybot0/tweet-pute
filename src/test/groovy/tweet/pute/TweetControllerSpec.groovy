@@ -5,13 +5,14 @@ import spock.lang.*
 import tweet.pute.TweetController
 
 @TestFor(TweetController)
-@Mock(Tweet)
+@Mock([Tweet, TweetPuteService])
 class TweetControllerSpec extends Specification {
     Random random = new Random()
     static Date then = new Date()-1
     static Date soon = new Date()+1
 
     def setup() {
+        Tweet.metaClass.getDateCreated = {twitterDate}
         //Create some tweets
         def oldTweet = new Tweet(text: "A later tweet",
                 tweetId: 1L,
