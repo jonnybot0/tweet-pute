@@ -10,5 +10,6 @@ class Url {
     Date dateCreated
     Date lastUpdated
     static constraints = {
+        text size: 1..2038 //ovverride default max of 255
     }
 }

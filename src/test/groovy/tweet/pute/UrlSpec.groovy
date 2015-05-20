@@ -15,8 +15,23 @@ class UrlSpec extends Specification {
     def cleanup() {
     }
 
-    void "test something"() {
-        expect:"fix me"
-            true == false
+    def "test length"() {
+        when:"fix me"
+            String exampleText = 'http://winnski.com/bs/'
+            def url = new Url(text: exampleText)
+            url.save()
+        then:
+            url.id //object persisted
+        when:
+            def aBunchOfAs = (1..2045).collect{'a'}.join('')
+            String tooLongURL = "http://${aBunchOfAs}.net".toString()
+            def tooLongUrl = new Url(text: tooLongURL)
+            def saveResult = tooLongUrl.save()
+            def error = tooLongUrl.errors.getFieldError('text')
+        then:
+            error
+            !error.isBindingFailure() //it's a validation error
+            error.getDefaultMessage().contains('size')
+            !saveResult
     }
 }
