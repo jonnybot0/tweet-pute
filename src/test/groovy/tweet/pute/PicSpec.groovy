@@ -17,14 +17,14 @@ class PicSpec extends Specification {
     def cleanup() {
     }
 
-    void "test inheritance and saving"() {
+    void "test saving"() {
         setup:
             def pic = new Pic(text: 'http://pic.twitter.com/foo')
             def saveResult = pic.save()
         expect:""
             pic instanceof Pic
-            pic instanceof Url
+            !(pic instanceof Url)
             saveResult
-            Url.list()[0].id == pic.id
+            Pic.list()[0].id == pic.id
     }
 }
