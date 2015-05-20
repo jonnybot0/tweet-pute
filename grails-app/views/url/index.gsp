@@ -13,6 +13,18 @@
                 <li><g:link class="create" action="create"><g:message code="default.new.label" args="[entityName]" /></g:link></li>
             </ul>
         </div>
+        <div>
+            <h1>Top 7 Domains</h1>
+            <table>
+                <tr>
+                    <th>Domain</th>
+                    <th>URL Count</th>
+                </tr>
+                <g:each in="${topDomains}" >
+                    <tr><td>${it.domain}</td><td> ${it.total}</td></tr>
+                </g:each>
+            </table>
+        </div>
         <div id="list-url" class="content scaffold-list" role="main">
             <h1><g:message code="default.list.label" args="[entityName]" /></h1>
             <g:if test="${flash.message}">

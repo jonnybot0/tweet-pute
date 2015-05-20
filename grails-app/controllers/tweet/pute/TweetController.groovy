@@ -12,7 +12,7 @@ class TweetController {
 
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
-        def tweetCount = Tweet.count()
+        Integer tweetCount = Tweet.count()
         Map averages = tweetPuteService.getTweetCollectionRates(tweetCount)
         Map stats = tweetPuteService.getCollaboratorStats(tweetCount)
         respond Tweet.list(params), model:[tweetCount: tweetCount, average: averages, stats: stats]

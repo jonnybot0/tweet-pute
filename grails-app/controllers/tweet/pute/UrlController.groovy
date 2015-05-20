@@ -2,6 +2,8 @@ package tweet.pute
 
 import static org.springframework.http.HttpStatus.*
 import grails.transaction.Transactional
+import grails.converters.JSON
+import org.hibernate.criterion.CriteriaSpecification
 
 @Transactional(readOnly = true)
 class UrlController {
@@ -12,7 +14,24 @@ class UrlController {
     def index(Integer max) {
         params.max = Math.min(max ?: 10, 100)
         List<Url> urls = tweetPuteService.listCollaborators(Url, params)
-        respond urls, model:[urlCount: Url.count()]
+        List<Map> topDomains = topDomains()?.getAt(1..7)
+        respond urls, model:[urlCount: Url.count(), topDomains: topDomains]
+    }
+
+    def rank() {
+        def domainCount = topDomains()
+        render domainCount as JSON
+    }
+
+    private List<Map> topDomains() {
+        def domainCount = Url.withCriteria {
+            resultTransformer(CriteriaSpecification.ALIAS_TO_ENTITY_MAP)
+            projections {
+                groupProperty "domain", "domain"
+                count "id", 'total'
+            }
+        }
+        List<Map> results = domainCount.sort{a, b -> b.total <=> a.total}
     }
 
     def show(Url url) {
